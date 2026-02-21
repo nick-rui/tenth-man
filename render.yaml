@@ -1,0 +1,15 @@
+services:
+  - type: worker
+    name: tenth-man-slack-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python slack_bot.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_APP_TOKEN
+        sync: false

@@ -1,0 +1,18 @@
+{
+  "page_title": "Tenth Man",
+  "page_caption": "How can I help you today?",
+  "stimulus_expander_title": "Directional Stimulus Used",
+  "degraded_warning": "Degraded mode: stimulus generation was unavailable for this turn.",
+  "stimulus_cues_heading": "Stimulus cues",
+  "no_stimulus_cues": "No structured stimulus cues captured.",
+  "sources_heading": "Sources",
+  "sidebar_fragility_label": "Counter-Pressure Level",
+  "sidebar_risk_signal_label": "Challenge Intensity",
+  "risk_signal_critical": "High Pushback",
+  "risk_signal_moderate": "Medium Pushback",
+  "risk_signal_low": "Light Pushback",
+  "sidebar_evidence_coverage_label": "Evidence Coverage",
+  "sidebar_degraded_caption": "Latest response used degraded mode (limited external stimulus).",
+  "chat_input_placeholder": "Share your next thought or claim...",
+  "spinner_text": "Consulting the devil..."
+}

@@ -9,6 +9,7 @@ from tenth_man import get_tenth_man_analysis_from_history
 
 
 load_dotenv()
+STATUS_MESSAGE = "Consulting the devil..."
 
 
 def _require_env(var_name: str, expected_prefix: str) -> str:
@@ -74,6 +75,8 @@ def _to_chat_history(messages: list[dict], bot_user_id: str) -> list[dict[str, s
         if role is None:
             continue
         text = _strip_mention(str(message.get("text", "")))
+        if role == "assistant" and text == STATUS_MESSAGE:
+            continue
         if text:
             chat_history.append({"role": role, "content": text})
     return chat_history
@@ -118,7 +121,10 @@ def _analysis_with_truncation(chat_history: list[dict[str, str]]):
 
 
 def _build_slack_reply(analysis) -> str:
-    return analysis.final_text + _format_sources(analysis.sources)
+    cleaned = analysis.final_text.replace(STATUS_MESSAGE, "").strip()
+    if not cleaned:
+        cleaned = "No response generated."
+    return cleaned + _format_sources(analysis.sources)
 
 
 slack_bot_token = _require_env("SLACK_BOT_TOKEN", "xoxb-")
@@ -139,6 +145,7 @@ def handle_mention(event, say):
         flush=True,
     )
     user_text = _parse_user_prompt(event)
+    say(STATUS_MESSAGE)
 
     channel_id = event.get("channel", "")
     history_messages = _fetch_channel_history(app.client, channel_id)

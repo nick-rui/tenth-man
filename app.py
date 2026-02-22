@@ -65,6 +65,10 @@ h1, h2, h3 {{
   font-style: italic;
 }}
 
+.landing-title {{
+  font-style: italic;
+}}
+
 p, li, div, label, span {{
   font-family: var(--tm-heading-font);
   font-style: normal;
@@ -109,11 +113,49 @@ p, li, div, label, span {{
 
 [data-testid="stChatInputContainer"] {{
   background: var(--tm-white) !important;
+  background-color: var(--tm-white) !important;
   border-top: 1px solid var(--tm-purple-soft);
+  bottom: 2.8rem !important;
+}}
+
+[data-testid="stBottomBlockContainer"],
+[data-testid="stBottomBlockContainer"] > div,
+[data-testid="stBottomBlockContainer"] > div > div,
+[data-testid="stChatFloatingInputContainer"] {{
+  background: var(--tm-white) !important;
+  background-color: var(--tm-white) !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+}}
+
+[data-testid="stChatInput"] {{
+  background: var(--tm-white) !important;
+  background-color: var(--tm-white) !important;
+}}
+
+[data-testid="stChatInputContainer"] > div,
+[data-testid="stChatInputContainer"] > div > div,
+[data-testid="stChatInputContainer"] > div > div > div {{
+  background: var(--tm-white) !important;
+  background-color: var(--tm-white) !important;
+}}
+
+[data-testid="stChatInputContainer"] [data-baseweb="textarea"],
+[data-testid="stChatInputContainer"] [data-baseweb="base-input"],
+[data-testid="stChatInputContainer"] [data-baseweb="input"],
+[data-testid="stChatInputContainer"] [data-baseweb="textarea"] > div {{
+  background: var(--tm-white) !important;
+  background-color: var(--tm-white) !important;
 }}
 
 [data-testid="stChatInputContainer"] textarea {{
-  background: transparent !important;
+  background: var(--tm-white) !important;
+  background-color: var(--tm-white) !important;
+}}
+
+[data-testid="stChatInputContainer"] input {{
+  background: var(--tm-white) !important;
+  background-color: var(--tm-white) !important;
 }}
 
 .stButton > button {{
@@ -135,6 +177,7 @@ p, li, div, label, span {{
   justify-content: center;
   margin-top: 0.4rem;
 }}
+
 </style>
 """,
         unsafe_allow_html=True,
@@ -164,7 +207,7 @@ def _render_landing() -> None:
         st.markdown(
             (
                 '<section class="landing-wrap">'
-                f"<h1>{TEXT['landing_title']}</h1>"
+                f'<h1 class="landing-title">{TEXT["landing_title"]}</h1>'
                 f'<p class="landing-subtitle">{TEXT["landing_subtitle"]}</p>'
             ),
             unsafe_allow_html=True,
@@ -172,23 +215,16 @@ def _render_landing() -> None:
         if st.button(TEXT["landing_cta_label"], type="primary"):
             st.session_state.view = "chat"
             st.rerun()
-        if st.button(TEXT["landing_how_it_works_button_label"]):
-            st.session_state.view = "how_it_works"
-            st.rerun()
         st.markdown("</section>", unsafe_allow_html=True)
 
 
 def _render_chat() -> None:
     st.title(TEXT["chat_title"])
     st.caption(TEXT["chat_caption"])
-    nav_col1, nav_col2, _ = st.columns([1, 1, 6])
+    nav_col1, _ = st.columns([1, 7])
     with nav_col1:
         if st.button(TEXT["chat_back_button_label"]):
             st.session_state.view = "landing"
-            st.rerun()
-    with nav_col2:
-        if st.button(TEXT["chat_how_it_works_button_label"]):
-            st.session_state.view = "how_it_works"
             st.rerun()
 
     for message in st.session_state.messages:
@@ -200,23 +236,6 @@ def _render_chat() -> None:
 
         with chat_ctx:
             st.markdown(message["content"])
-            if role == "assistant":
-                stimulus_summary = message.get("stimulus_summary", [])
-                sources = message.get("sources", [])
-                degraded_mode = bool(message.get("degraded_mode", False))
-                with st.expander(TEXT["stimulus_expander_title"], expanded=False):
-                    if degraded_mode:
-                        st.warning(TEXT["degraded_warning"])
-                    if stimulus_summary:
-                        st.markdown(f"**{TEXT['stimulus_cues_heading']}**")
-                        for item in stimulus_summary:
-                            st.markdown(f"- {item}")
-                    else:
-                        st.markdown(f"- {TEXT['no_stimulus_cues']}")
-                    if sources:
-                        st.markdown(f"**{TEXT['sources_heading']}**")
-                        for url in sources[:5]:
-                            st.markdown(f"- {url}")
 
     if user_prompt := st.chat_input(TEXT["chat_input_placeholder"]):
         st.session_state.messages.append({"role": "user", "content": user_prompt})
@@ -228,56 +247,16 @@ def _render_chat() -> None:
                 history_payload = _build_chat_history_payload(st.session_state.messages)
                 prepared = prepare_tenth_man_stream_from_history(history_payload)
                 assistant_reply = st.write_stream(prepared.token_stream)
-                with st.expander(TEXT["stimulus_expander_title"], expanded=False):
-                    if prepared.degraded_mode:
-                        st.warning(TEXT["degraded_warning"])
-                    if prepared.stimulus_summary:
-                        st.markdown(f"**{TEXT['stimulus_cues_heading']}**")
-                        for item in prepared.stimulus_summary:
-                            st.markdown(f"- {item}")
-                    else:
-                        st.markdown(f"- {TEXT['no_stimulus_cues']}")
-                    if prepared.sources:
-                        st.markdown(f"**{TEXT['sources_heading']}**")
-                        for url in prepared.sources[:5]:
-                            st.markdown(f"- {url}")
 
         st.session_state.messages.append(
             {
                 "role": "assistant",
                 "content": assistant_reply,
-                "stimulus_summary": prepared.stimulus_summary,
-                "sources": prepared.sources,
-                "degraded_mode": prepared.degraded_mode,
             }
         )
-
-def _render_how_it_works() -> None:
-    st.title(TEXT["how_title"])
-    st.caption(TEXT["how_subtitle"])
-
-    nav_col1, nav_col2, _ = st.columns([1, 1, 6])
-    with nav_col1:
-        if st.button(TEXT["how_back_button_label"]):
-            st.session_state.view = "landing"
-            st.rerun()
-    with nav_col2:
-        if st.button(TEXT["how_go_to_chat_button_label"]):
-            st.session_state.view = "chat"
-            st.rerun()
-
-    st.markdown(f"### {TEXT['how_dsp_section_title']}")
-    for bullet in TEXT["how_dsp_bullets"]:
-        st.markdown(f"- {bullet}")
-
-    st.markdown(f"### {TEXT['how_model_access_section_title']}")
-    for bullet in TEXT["how_model_access_bullets"]:
-        st.markdown(f"- {bullet}")
 
 
 if st.session_state.view == "landing":
     _render_landing()
-elif st.session_state.view == "how_it_works":
-    _render_how_it_works()
 else:
     _render_chat()
